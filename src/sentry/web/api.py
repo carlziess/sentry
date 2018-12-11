@@ -199,25 +199,27 @@ class APIView(BaseView):
 
         # TODO(dcramer): it'd be nice if we had an incr_multi method so
         # tsdb could optimize this
-        metrics.incr('client-api.all-versions.requests')
+        metrics.incr('client-api.all-versions.requests', skip_internal=False)
         metrics.incr('client-api.all-versions.responses.%s' %
-                     (response.status_code, ))
+                     (response.status_code, ), skip_internal=False)
         metrics.incr(
-            'client-api.all-versions.responses.%sxx' % (
-                six.text_type(response.status_code)[0], )
+            'client-api.all-versions.responses.%sxx' % (six.text_type(response.status_code)[0],),
+            skip_internal=False,
         )
 
         if helper.context.version:
-            metrics.incr('client-api.v%s.requests' %
-                         (helper.context.version, ))
             metrics.incr(
-                'client-api.v%s.responses.%s' % (
-                    helper.context.version, response.status_code)
+                'client-api.v%s.requests' % (helper.context.version, ),
+                skip_internal=False,
             )
             metrics.incr(
-                'client-api.v%s.responses.%sxx' %
-                (helper.context.version, six.text_type(
-                    response.status_code)[0])
+                'client-api.v%s.responses.%s' % (helper.context.version, response.status_code),
+                skip_internal=False,
+            )
+            metrics.incr(
+                'client-api.v%s.responses.%sxx' % (helper.context.version,
+                                                   six.text_type(response.status_code)[0]),
+                skip_internal=False,
             )
 
         if response.status_code != 200 and origin:
@@ -371,7 +373,7 @@ class StoreView(APIView):
         pass
 
     def process(self, request, project, key, auth, helper, data, attachments=None, **kwargs):
-        metrics.incr('events.total')
+        metrics.incr('events.total', skip_internal=False)
 
         if not data:
             raise APIError('No JSON data was found')
@@ -421,8 +423,9 @@ class StoreView(APIView):
                 timestamp=tsdb_start_time,
             )
 
-            metrics.incr('events.blacklisted', tags={
-                         'reason': filter_reason})
+            metrics.incr(
+                'events.blacklisted', tags={'reason': filter_reason}, skip_internal=False
+            )
             event_filtered.send_robust(
                 ip=remote_addr,
                 project=project,
@@ -459,7 +462,8 @@ class StoreView(APIView):
                 'events.dropped',
                 tags={
                     'reason': rate_limit.reason_code if rate_limit else 'unknown',
-                }
+                },
+                skip_internal=False,
             )
             event_dropped.send_robust(
                 ip=remote_addr,
