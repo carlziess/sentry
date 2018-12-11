@@ -9,23 +9,18 @@ import {DEFAULT_STATS_PERIOD, DEFAULT_USE_UTC} from 'app/constants';
 import {defined} from 'app/utils';
 import {getLocalDateObject, getUtcDateString} from 'app/utils/dates';
 import {t} from 'app/locale';
+import {updateProjects} from 'app/actionCreators/globalSelection';
 import BetaTag from 'app/components/betaTag';
 import Feature from 'app/components/acl/feature';
-import Header from 'app/components/organizations/header';
-import HeaderSeparator from 'app/components/organizations/headerSeparator';
-import HeaderItemPosition from 'app/components/organizations/headerItemPosition';
-import MultipleEnvironmentSelector from 'app/components/organizations/multipleEnvironmentSelector';
-import MultipleProjectSelector from 'app/components/organizations/multipleProjectSelector';
+import GlobalSelectionHeader from 'app/components/organizations/globalSelectionHeader';
 import SentryTypes from 'app/sentryTypes';
-import TimeRangeSelector from 'app/components/organizations/timeRangeSelector';
 import space from 'app/styles/space';
-import {updateProjects} from 'app/actionCreators/globalSelection';
 import withGlobalSelection from 'app/utils/withGlobalSelection';
 import withOrganization from 'app/utils/withOrganization';
 
-import SearchBar from './searchBar';
 import {getParams} from './utils/getParams';
 import EventsContext from './utils/eventsContext';
+import SearchBar from './searchBar';
 
 // `lodash.isEqual` does not compare date objects properly?
 const dateComparator = (value, other) => {
@@ -217,39 +212,25 @@ class OrganizationEventsContainer extends React.Component {
       <EventsContext.Provider value={{actions: this.actions, ...this.state.queryValues}}>
         <OrganizationEventsContent>
           <Feature features={['global-views']} renderDisabled>
-            <Header>
-              <HeaderItemPosition>
-                <MultipleProjectSelector
-                  organization={organization}
-                  projects={projects}
-                  value={this.state.project}
-                  onChange={this.handleChangeProjects}
-                  onUpdate={this.handleUpdateProjects}
-                />
-              </HeaderItemPosition>
-              <HeaderSeparator />
-              <HeaderItemPosition>
-                <MultipleEnvironmentSelector
-                  organization={organization}
-                  value={this.state.environment}
-                  onChange={this.handleChangeEnvironments}
-                  onUpdate={this.handleUpdateEnvironmments}
-                />
-              </HeaderItemPosition>
-              <HeaderSeparator />
-              <HeaderItemPosition>
-                <TimeRangeSelector
-                  showAbsolute
-                  showRelative
-                  relative={period}
-                  start={start}
-                  end={end}
-                  utc={utc}
-                  onChange={this.handleChangeTime}
-                  onUpdate={this.handleUpdatePeriod}
-                />
-              </HeaderItemPosition>
-            </Header>
+            <GlobalSelectionHeader
+              organization={organization}
+              projects={projects}
+              project={this.state.project}
+              environment={this.state.environment}
+              showAbsolute={true}
+              showRelative={true}
+              relative={period}
+              start={start}
+              end={end}
+              utc={utc}
+              onChangeProjects={this.handleChangeProjects}
+              onUpdateProjects={this.handleUpdateProjects}
+              onChangeEnvironments={this.handleChangeEnvironments}
+              onUpdateEnvironments={this.handleUpdateEnvironmments}
+              onChangeTime={this.handleChangeTime}
+              onUpdateTime={this.handleUpdatePeriod}
+            />
+
             <Body>
               <Flex align="center" justify="space-between" mb={2}>
                 <HeaderTitle>
